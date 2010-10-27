@@ -1,3 +1,9 @@
+strace (4.5.20-2.max.0.1) UNRELEASED; urgency=low
+
+  * reenable simultaneous -p and command
+
+ -- Max Kirillov <max@max630.net>  Thu, 28 Oct 2010 01:33:37 +0300
+
 strace (4.5.20-2) unstable; urgency=low
 
   * Add missing sparc syscall defines to fix FTBFS on sparc.
