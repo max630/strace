@@ -843,7 +843,7 @@ main(int argc, char *argv[])
 		}
 	}
 
-	if ((optind == argc) == !pflag_seen)
+	if ((optind == argc) && !pflag_seen)
 		usage(stderr, 1);
 
 	if (!followfork)
@@ -904,23 +904,16 @@ main(int argc, char *argv[])
 
 	if (!outfname || outfname[0] == '|' || outfname[0] == '!')
 		setvbuf(outf, buf, _IOLBF, BUFSIZ);
-	if (outfname && optind < argc) {
+	if (outfname && optind < argc && !pflag_seen) {
 		interactive = 0;
 		qflag = 1;
 	}
-	/* Valid states here:
-	   optind < argc	pflag_seen	outfname	interactive
-	   1			0		0		1
-	   0			1		0		1
-	   1			0		1		0
-	   0			1		1		1
-	 */
 
 	/* STARTUP_CHILD must be called before the signal handlers get
 	   installed below as they are inherited into the spawned process.
 	   Also we do not need to be protected by them as during interruption
 	   in the STARTUP_CHILD mode we kill the spawned process anyway.  */
-	if (!pflag_seen)
+	if (optind < argc)
 		startup_child(&argv[optind]);
 
 	sigemptyset(&empty_set);
@@ -2646,7 +2639,7 @@ struct tcb *tcp;
 		}
 	}
 	curcol = 0;
-	if ((followfork == 1 || pflag_seen > 1) && outfname)
+	if ((followfork == 1 || pflag_seen > 1 || (pflag_seen && strace_child)) && outfname)
 		tprintf("%-5d ", tcp->pid);
 	else if (nprocs > 1 && !outfname)
 		tprintf("[pid %5u] ", tcp->pid);
