@@ -1,8 +1,12 @@
-strace (4.5.20-2.max.0.1) UNRELEASED; urgency=low
+strace (4.5.20-2.max.1) unstable; urgency=low
 
-  * reenable simultaneous -p and command
+  * allow using both -p option and command
+    + fix check of options to pass such case
+    + launch the command if there is an argument for it
+    + turn on non-interactive status only if there is no -p argument
+    + print pids to outfile when -p and command both specified
 
- -- Max Kirillov <max@max630.net>  Thu, 28 Oct 2010 01:33:37 +0300
+ -- Max Kirillov <max@max630.net>  Thu, 28 Oct 2010 03:48:11 +0300
 
 strace (4.5.20-2) unstable; urgency=low
 
