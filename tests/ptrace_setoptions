@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 # Ensure that strace tests kernel PTRACE_O_TRACECLONE support properly.
 
