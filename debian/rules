@@ -19,7 +19,7 @@ DEB_BUILD_GNU_TYPE := $(shell dpkg-architecture -qDEB_BUILD_GNU_TYPE)
 DEB_HOST_GNU_TYPE := $(shell dpkg-architecture -qDEB_HOST_GNU_TYPE)
 DEB_HOST_ARCH := $(shell dpkg-architecture -qDEB_HOST_ARCH)
 
-arch64_map = i386=x86_64 powerpc=powerpc64 sparc=sparc64 s390=s390x
+arch64_map = powerpc=powerpc64 sparc=sparc64 s390=s390x
 ifneq (,$(filter $(DEB_HOST_ARCH)=%, $(arch64_map)))
   HOST64 = $(strip $(patsubst $(DEB_HOST_ARCH)=%, %, \
 	     $(filter $(DEB_HOST_ARCH)=%, $(arch64_map))))-linux-gnu
