@@ -42,13 +42,16 @@ ifeq (,$(findstring nocheck,$(DEB_BUILD_OPTIONS)))
 endif
 	touch $@
 
-build/Makefile:
+build/Makefile: configure
 	mkdir -p $(@D)
 	cd $(@D); sh ../configure --prefix=/usr $(CONFIG_OPTS)
 
-build64/Makefile:
+build64/Makefile: configure
 	mkdir -p $(@D)
 	cd $(@D); CC="$(CC64)" sh ../configure --prefix=/usr --build=$(DEB_BUILD_GNU_TYPE) --host=$(HOST64)
+
+configure:
+	autoreconf -i -f
 
 clean:
 	dh_testdir
