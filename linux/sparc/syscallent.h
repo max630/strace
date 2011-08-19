@@ -214,7 +214,7 @@
 	{ 1,	TF,	sys_swapoff,	"swapoff" },		/* 213 */
 	{ 1,	0,	sys_sysinfo,	"sysinfo" },		/* 214 */
 	{ 5,	0,	sys_ipc,	"ipc" },		/* 215 */
-	{ 1,	TS,	sys_sigreturn,	"sigreturn" },		/* 216 */
+	{ 0,	TS,	sys_sigreturn,	"sigreturn" },		/* 216 */
 	{ 5,	TP,	sys_clone,	"clone" },		/* 217 */
 	{ 3,	0,	sys_modify_ldt,	"modify_ldt" },		/* 218 */
 	{ 1,	0,	sys_adjtimex,	"adjtimex" },		/* 219 */
@@ -322,8 +322,8 @@
 	{ 2,	TD,	sys_pipe2,		"pipe2"		}, /* 321 */
 	{ 1,	TD,	sys_inotify_init1,	"inotify_init1"	}, /* 322 */
 	{ 4,	TN,	sys_accept4,		"accept4"	}, /* 323 */
-	{ 5,	TD,	printargs,		"preadv"	}, /* 324 */
-	{ 5,	TD,	printargs,		"pwritev"	}, /* 325 */
+	{ 5,	TD,	sys_preadv,		"preadv"	}, /* 324 */
+	{ 5,	TD,	sys_pwritev,		"pwritev"	}, /* 325 */
 	{ 4,	TP|TS,	printargs,		"rt_tgsigqueueinfo"}, /* 326 */
 	{ 5,	TD,	printargs,		"perf_event_open"}, /* 327 */
 	{ 5,	TN,	sys_recvmmsg,		"recvmmsg"	}, /* 328 */
@@ -354,7 +354,7 @@
 #if SYS_socket_subcall != 353
  #error fix me
 #endif
-	{ 8,	0,	printargs,		"socket_subcall"}, /* 353 */
+	{ 6,	0,	printargs,		"socket_subcall"}, /* 353 */
 	{ 3,	TN,	sys_socket,		"socket"	}, /* 354 */
 	{ 3,	TN,	sys_bind,		"bind"		}, /* 355 */
 	{ 3,	TN,	sys_connect,		"connect"	}, /* 356 */

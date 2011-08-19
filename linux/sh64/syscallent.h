@@ -147,7 +147,7 @@
 	{ 1,	0,	sys_sysinfo,		"sysinfo"	}, /* 116 */
 	{ 5,	0,	sys_ipc,		"ipc"		}, /* 117 */
 	{ 1,	TD,	sys_fsync,		"fsync"		}, /* 118 */
-	{ 1,	TS,	sys_sigreturn,		"sigreturn"	}, /* 119 */
+	{ 0,	TS,	sys_sigreturn,		"sigreturn"	}, /* 119 */
 	{ 5,	TP,	sys_clone,		"clone"		}, /* 120 */
 	{ 2,	0,	sys_setdomainname,	"setdomainname"	}, /* 121 */
 	{ 1,	0,	sys_uname,		"uname"		}, /* 122 */
@@ -202,7 +202,7 @@
 	{ 3,	0,	sys_getresgid,		"getresgid"	}, /* 171 */
 	{ 5,	0,	sys_prctl,		"prctl"		}, /* 172 */
 	{ 1,	TS,	printargs,		"rt_sigreturn"	}, /* 173 */
-	{ 4,	TS,	sys_rt_sigaction,	"rt_sigaction"  }, /* 174 */
+	{ 4,	TS,	sys_rt_sigaction,	"rt_sigaction"	}, /* 174 */
 	{ 4,	TS,	sys_rt_sigprocmask,	"rt_sigprocmask"}, /* 175 */
 	{ 2,	TS,	sys_rt_sigpending,	"rt_sigpending"	}, /* 176 */
 	{ 4,	TS,	sys_rt_sigtimedwait,	"rt_sigtimedwait"}, /* 177 */
@@ -295,7 +295,7 @@
 	{ 2,	TF,	sys_removexattr,	"lremovexattr"	}, /* 264 */
 	{ 2,	TD,	sys_fremovexattr,	"fremovexattr"	}, /* 265 */
 	{ 2,	TD,	sys_kill,		"tkill"		}, /* 266 */
-	{ 5,	TD|TN,	sys_sendfile64,		"sendfile64"	}, /* 267 */
+	{ 4,	TD|TN,	sys_sendfile64,		"sendfile64"	}, /* 267 */
 	{ 6,	0,	sys_futex,		"futex"		}, /* 268 */
 	{ 3,	0,	sys_sched_setaffinity,	"sched_setaffinity"}, /* 269 */
 	{ 3,	0,	sys_sched_getaffinity,	"sched_getaffinity"}, /* 270 */
@@ -389,8 +389,8 @@
 	{ 3,	TD,	sys_dup3,		"dup3"		}, /* 358 */
 	{ 2,	TD,	sys_pipe2,		"pipe2"		}, /* 359 */
 	{ 1,	TD,	sys_inotify_init1,	"inotify_init1"	}, /* 360 */
-	{ 5,	TD,	printargs,		"preadv"	}, /* 361 */
-	{ 5,	TD,	printargs,		"pwritev"	}, /* 362 */
+	{ 5,	TD,	sys_preadv,		"preadv"	}, /* 361 */
+	{ 5,	TD,	sys_pwritev,		"pwritev"	}, /* 362 */
 	{ 4,	TP|TS,	printargs,		"rt_tgsigqueueinfo"}, /* 363 */
 	{ 5,	TD,	printargs,		"perf_event_open"}, /* 364 */
 	{ 5,	TN,	sys_recvmmsg,		"recvmmsg"	}, /* 365 */
@@ -432,7 +432,7 @@
 #if SYS_socket_subcall != 400
  #error fix me
 #endif
-	{ 8,	0,	printargs,		"socket_subcall"}, /* 400 */
+	{ 6,	0,	printargs,		"socket_subcall"}, /* 400 */
 	{ 3,	TN,	sys_socket,		"socket"	}, /* 401 */
 	{ 3,	TN,	sys_bind,		"bind"		}, /* 402 */
 	{ 3,	TN,	sys_connect,		"connect"	}, /* 403 */

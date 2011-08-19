@@ -207,8 +207,7 @@ void sprint_timespec(char *buf, struct tcb *tcp, long addr)
 }
 
 int
-sys_time(tcp)
-struct tcb *tcp;
+sys_time(struct tcb *tcp)
 {
 	if (exiting(tcp)) {
 #ifndef SVR4
@@ -219,8 +218,7 @@ struct tcb *tcp;
 }
 
 int
-sys_stime(tcp)
-struct tcb *tcp;
+sys_stime(struct tcb *tcp)
 {
 	if (exiting(tcp)) {
 		printnum(tcp, tcp->u_arg[0], "%ld");
@@ -229,8 +227,7 @@ struct tcb *tcp;
 }
 
 int
-sys_gettimeofday(tcp)
-struct tcb *tcp;
+sys_gettimeofday(struct tcb *tcp)
 {
 	if (exiting(tcp)) {
 		if (syserror(tcp)) {
@@ -250,8 +247,7 @@ struct tcb *tcp;
 
 #ifdef ALPHA
 int
-sys_osf_gettimeofday(tcp)
-struct tcb *tcp;
+sys_osf_gettimeofday(struct tcb *tcp)
 {
 	if (exiting(tcp)) {
 		if (syserror(tcp)) {
@@ -269,8 +265,7 @@ struct tcb *tcp;
 #endif
 
 int
-sys_settimeofday(tcp)
-struct tcb *tcp;
+sys_settimeofday(struct tcb *tcp)
 {
 	if (entering(tcp)) {
 		printtv(tcp, tcp->u_arg[0]);
@@ -284,8 +279,7 @@ struct tcb *tcp;
 
 #ifdef ALPHA
 int
-sys_osf_settimeofday(tcp)
-struct tcb *tcp;
+sys_osf_settimeofday(struct tcb *tcp)
 {
 	if (entering(tcp)) {
 		printtv_bitness(tcp, tcp->u_arg[0], BITNESS_32, 0);
@@ -299,8 +293,7 @@ struct tcb *tcp;
 #endif
 
 int
-sys_adjtime(tcp)
-struct tcb *tcp;
+sys_adjtime(struct tcb *tcp)
 {
 	if (entering(tcp)) {
 		printtv(tcp, tcp->u_arg[0]);
@@ -366,7 +359,7 @@ printitv_bitness(struct tcb *tcp, long addr, enum bitness_t bitness)
 		} else {
 			struct itimerval itv;
 
-			if ((rc = umove(tcp, addr, &itv)) >= 0)	{
+			if ((rc = umove(tcp, addr, &itv)) >= 0) {
 				tprintf("{it_interval=");
 				tprint_timeval(tcp, &itv.it_interval);
 				tprintf(", it_value=");
@@ -383,8 +376,7 @@ printitv_bitness(struct tcb *tcp, long addr, enum bitness_t bitness)
 	printitv_bitness((tcp), (addr), BITNESS_CURRENT)
 
 int
-sys_getitimer(tcp)
-struct tcb *tcp;
+sys_getitimer(struct tcb *tcp)
 {
 	if (entering(tcp)) {
 		printxval(which, tcp->u_arg[0], "ITIMER_???");
@@ -401,8 +393,7 @@ struct tcb *tcp;
 
 #ifdef ALPHA
 int
-sys_osf_getitimer(tcp)
-struct tcb *tcp;
+sys_osf_getitimer(struct tcb *tcp)
 {
 	if (entering(tcp)) {
 		printxval(which, tcp->u_arg[0], "ITIMER_???");
@@ -418,8 +409,7 @@ struct tcb *tcp;
 #endif
 
 int
-sys_setitimer(tcp)
-struct tcb *tcp;
+sys_setitimer(struct tcb *tcp)
 {
 	if (entering(tcp)) {
 		printxval(which, tcp->u_arg[0], "ITIMER_???");
@@ -437,8 +427,7 @@ struct tcb *tcp;
 
 #ifdef ALPHA
 int
-sys_osf_setitimer(tcp)
-struct tcb *tcp;
+sys_osf_setitimer(struct tcb *tcp)
 {
 	if (entering(tcp)) {
 		printxval(which, tcp->u_arg[0], "ITIMER_???");
@@ -694,8 +683,7 @@ static const struct xlat clocknames[] = {
 };
 
 int
-sys_clock_settime(tcp)
-struct tcb *tcp;
+sys_clock_settime(struct tcb *tcp)
 {
 	if (entering(tcp)) {
 		printxval(clocknames, tcp->u_arg[0], "CLOCK_???");
@@ -706,8 +694,7 @@ struct tcb *tcp;
 }
 
 int
-sys_clock_gettime(tcp)
-struct tcb *tcp;
+sys_clock_gettime(struct tcb *tcp)
 {
 	if (entering(tcp)) {
 		printxval(clocknames, tcp->u_arg[0], "CLOCK_???");
@@ -722,8 +709,7 @@ struct tcb *tcp;
 }
 
 int
-sys_clock_nanosleep(tcp)
-struct tcb *tcp;
+sys_clock_nanosleep(struct tcb *tcp)
 {
 	if (entering(tcp)) {
 		printxval(clocknames, tcp->u_arg[0], "CLOCK_???");
@@ -798,13 +784,12 @@ printsigevent(struct tcb *tcp, long arg)
 	struct sigevent sev;
 
 #if SUPPORTED_PERSONALITIES > 1
-	if (personality_wordsize[current_personality] == 4)
-	{
+	if (personality_wordsize[current_personality] == 4) {
 		printsigevent32(tcp, arg);
 		return;
 	}
 #endif
-	if (umove (tcp, arg, &sev) < 0)
+	if (umove(tcp, arg, &sev) < 0)
 		tprintf("{...}");
 	else {
 		tprintf("{%p, ", sev.sigev_value.sival_ptr);
@@ -829,8 +814,7 @@ printsigevent(struct tcb *tcp, long arg)
 }
 
 int
-sys_timer_create(tcp)
-struct tcb *tcp;
+sys_timer_create(struct tcb *tcp)
 {
 	if (entering(tcp)) {
 		printxval(clocknames, tcp->u_arg[0], "CLOCK_???");
@@ -838,19 +822,18 @@ struct tcb *tcp;
 		printsigevent(tcp, tcp->u_arg[1]);
 		tprintf(", ");
 	} else {
-		void *p;
+		int timer_id;
 
-		if (syserror(tcp) || umove(tcp, tcp->u_arg[2], &p) < 0)
+		if (syserror(tcp) || umove(tcp, tcp->u_arg[2], &timer_id) < 0)
 			tprintf("%#lx", tcp->u_arg[2]);
 		else
-			tprintf("{%p}", p);
+			tprintf("{%d}", timer_id);
 	}
 	return 0;
 }
 
 int
-sys_timer_settime(tcp)
-struct tcb *tcp;
+sys_timer_settime(struct tcb *tcp)
 {
 	if (entering(tcp)) {
 		tprintf("%#lx, ", tcp->u_arg[0]);
@@ -868,8 +851,7 @@ struct tcb *tcp;
 }
 
 int
-sys_timer_gettime(tcp)
-struct tcb *tcp;
+sys_timer_gettime(struct tcb *tcp)
 {
 	if (entering(tcp)) {
 		tprintf("%#lx, ", tcp->u_arg[0]);
@@ -883,9 +865,7 @@ struct tcb *tcp;
 }
 
 static void
-print_rtc(tcp, rt)
-struct tcb *tcp;
-const struct rtc_time *rt;
+print_rtc(struct tcb *tcp, const struct rtc_time *rt)
 {
 	tprintf("{tm_sec=%d, tm_min=%d, tm_hour=%d, "
 		"tm_mday=%d, tm_mon=%d, tm_year=%d, ",
@@ -899,10 +879,7 @@ const struct rtc_time *rt;
 }
 
 int
-rtc_ioctl(tcp, code, arg)
-struct tcb *tcp;
-long code;
-long arg;
+rtc_ioctl(struct tcb *tcp, long code, long arg)
 {
 	switch (code) {
 	case RTC_ALM_SET:
@@ -983,8 +960,7 @@ static const struct xlat timerfdflags[] = {
 };
 
 int
-sys_timerfd(tcp)
-struct tcb *tcp;
+sys_timerfd(struct tcb *tcp)
 {
 	if (entering(tcp)) {
 		/* It does not matter that the kernel uses itimerspec.  */

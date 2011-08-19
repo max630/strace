@@ -4002,7 +4002,7 @@
 	{ 0,	0,	printargs,		"SYS_3999"	}, /* 3999 */ /* end of POSIX */
 #if !defined (LINUX_MIPSN32) && !defined (LINUX_MIPSN64)
 	/* For an O32 strace, decode the o32 syscalls.  */
-	{ 8,	0,	printargs,		"syscall"	}, /* 4000 */ /* start of Linux o32 */
+	{ 7,	0,	printargs,		"syscall"	}, /* 4000 */ /* start of Linux o32 */
 	{ 1,	TP,	sys_exit,		"exit"		}, /* 4001 */
 	{ 0,	TP,	sys_fork,		"fork"		}, /* 4002 */
 	{ 3,	TD,	sys_read,		"read"		}, /* 4003 */
@@ -4121,7 +4121,7 @@
 	{ 1,	0,	sys_sysinfo,		"sysinfo"	}, /* 4116 */
 	{ 6,	0,	sys_ipc,		"ipc"		}, /* 4117 */
 	{ 1,	TD,	sys_fsync,		"fsync"		}, /* 4118 */
-	{ 1,	TS,	sys_sigreturn,		"sigreturn"	}, /* 4119 */
+	{ 0,	TS,	sys_sigreturn,		"sigreturn"	}, /* 4119 */
 	{ 5,	TP,	sys_clone,		"clone"		}, /* 4120 */
 	{ 2,	0,	sys_setdomainname,	"setdomainname"	}, /* 4121 */
 	{ 1,	0,	sys_uname,		"uname"		}, /* 4122 */
@@ -4239,7 +4239,7 @@
 	{ 2,	TF,	sys_removexattr,	"lremovexattr"	}, /* 4234 */
 	{ 2,	TD,	sys_fremovexattr,	"fremovexattr"	}, /* 4235 */
 	{ 2,	TS,	sys_kill,		"tkill"		}, /* 4236 */
-	{ 5,	TD|TN,	sys_sendfile64,		"sendfile64"	}, /* 4237 */
+	{ 4,	TD|TN,	sys_sendfile64,		"sendfile64"	}, /* 4237 */
 	{ 6,	0,	sys_futex,		"futex"		}, /* 4238 */
 	{ 3,	0,	sys_sched_setaffinity,	"sched_setaffinity"}, /* 4239 */
 	{ 3,	0,	sys_sched_getaffinity,	"sched_getaffinity"}, /* 4240 */
@@ -4332,8 +4332,8 @@
 	{ 3,	TD,	sys_dup3,		"dup3"		}, /* 4327 */
 	{ 2,	TD,	sys_pipe2,		"pipe2"		}, /* 4328 */
 	{ 1,	TD,	sys_inotify_init1,	"inotify_init1"	}, /* 4329 */
-	{ 6,	TD,	printargs,		"preadv"	}, /* 4330 */
-	{ 6,	TD,	printargs,		"pwritev"	}, /* 4331 */
+	{ 6,	TD,	sys_preadv,		"preadv"	}, /* 4330 */
+	{ 6,	TD,	sys_pwritev,		"pwritev"	}, /* 4331 */
 	{ 4,	TP|TS,	printargs,		"rt_tgsigqueueinfo" }, /* 4332 */
 	{ 5,	TD,	printargs,		"perf_event_open" }, /* 4333 */
 	{ 4,	TN,	sys_accept4,		"accept4"	}, /* 4334 */
@@ -4682,9 +4682,6 @@
 	{ 5,	0,	printargs,		"o32_fanotify_mark"	}, /* 4337 */
 	{ 4,	0,	printargs,		"o32_prlimit64"	}, /* 4338 */
 #endif
-	{ 0,	0,	printargs,		"SYS_4336"	}, /* 4336 */
-	{ 0,	0,	printargs,		"SYS_4337"	}, /* 4337 */
-	{ 0,	0,	printargs,		"SYS_4338"	}, /* 4338 */
 	{ 0,	0,	printargs,		"SYS_4339"	}, /* 4339 */
 	{ 0,	0,	printargs,		"SYS_4340"	}, /* 4340 */
 	{ 0,	0,	printargs,		"SYS_4341"	}, /* 4341 */
@@ -5637,8 +5634,8 @@
 	{ 3,	TD,	sys_dup3,		"dup3"		}, /* 5286 */
 	{ 2,	TD,	sys_pipe2,		"pipe2"		}, /* 5287 */
 	{ 1,	TD,	sys_inotify_init1,	"inotify_init1"	}, /* 5288 */
-	{ 5,	TD,	printargs,		"preadv"	}, /* 5289 */
-	{ 5,	TD,	printargs,		"pwritev"	}, /* 5290 */
+	{ 5,	TD,	sys_preadv,		"preadv"	}, /* 5289 */
+	{ 5,	TD,	sys_pwritev,		"pwritev"	}, /* 5290 */
 	{ 4,	TP|TS,	printargs,		"rt_tgsigqueueinfo" }, /* 5291 */
 	{ 5,	TD,	printargs,		"perf_event_open" }, /* 5292 */
 	{ 4,	TN,	sys_accept4,		"accept4"	}, /* 5293 */
@@ -6947,8 +6944,8 @@
 	{ 3,	TD,	sys_dup3,		"dup3"		}, /* 6290 */
 	{ 2,	TD,	sys_pipe2,		"pipe2"		}, /* 6291 */
 	{ 1,	TD,	sys_inotify_init1,	"inotify_init1"	}, /* 6292 */
-	{ 5,	TD,	printargs,		"preadv"	}, /* 6293 */
-	{ 5,	TD,	printargs,		"pwritev"	}, /* 6294 */
+	{ 5,	TD,	sys_preadv,		"preadv"	}, /* 6293 */
+	{ 5,	TD,	sys_pwritev,		"pwritev"	}, /* 6294 */
 	{ 4,	TP|TS,	printargs,		"rt_tgsigqueueinfo" }, /* 6295 */
 	{ 5,	TD,	printargs,		"perf_event_open" }, /* 6296 */
 	{ 4,	TN,	sys_accept4,		"accept4"	}, /* 6297 */

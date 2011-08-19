@@ -178,7 +178,7 @@
 	{ 3,	0,	sys_setresgid,		"setresgid"		}, /* 170 */
 	{ 3,	0,	sys_setresgid,		"getresgid"		}, /* 171 */
 	{ 5,	0,	sys_prctl,		"prctl"			}, /* 172 */
-	{ 1,	TS,	sys_sigreturn,		"rt_sigreturn"		}, /* 173 */
+	{ 0,	TS,	sys_sigreturn,		"rt_sigreturn"		}, /* 173 */
 	{ 4,	TS,	sys_rt_sigaction,	"rt_sigaction"		}, /* 174 */
 	{ 4,	TS,	sys_rt_sigprocmask,	"rt_sigprocmask"	}, /* 175 */
 	{ 2,	TS,	sys_rt_sigpending,	"rt_sigpending"		}, /* 176 */
@@ -233,7 +233,7 @@
 	{ 4,	TD,	sys_epoll_ctl,		"epoll_ctl"		}, /* 225 */
 	{ 4,	TD,	sys_epoll_wait,		"epoll_wait"		}, /* 226 */
 	{ 5,	0,	printargs,		"remap_file_pages"	}, /* 227 */
-	{ 5,    TI,     sys_semtimedop,         "semtimedop"            }, /* 228 */
+	{ 5,	TI,	sys_semtimedop,		"semtimedop"		}, /* 228 */
 	{ 5,	0,	printargs,		"mq_open"		}, /* 229 */
 	{ 5,	0,	printargs,		"mq_unlink"		}, /* 230 */
 	{ 5,	0,	printargs,		"mq_timedsend"		}, /* 231 */
@@ -320,8 +320,8 @@
 	{ 3,	TD,	sys_dup3,		"dup3"			}, /* 312 */
 	{ 2,	TD,	sys_pipe2,		"pipe2"			}, /* 313 */
 	{ 1,	TD,	sys_inotify_init1,	"inotify_init1"		}, /* 314 */
-	{ 5,	TD,	printargs,		"preadv"		}, /* 315 */
-	{ 5,	TD,	printargs,		"pwritev"		}, /* 316 */
+	{ 5,	TD,	sys_preadv,		"preadv"		}, /* 315 */
+	{ 5,	TD,	sys_pwritev,		"pwritev"		}, /* 316 */
 	{ 4,	TP|TS,	printargs,		"rt_tgsigqueueinfo"	}, /* 317 */
 	{ 5,	TD,	printargs,		"perf_event_open"	}, /* 318 */
 	{ 5,	TN,	sys_recvmmsg,		"recvmmsg"		}, /* 319 */

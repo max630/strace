@@ -147,7 +147,7 @@
 	{ 1,	0,	sys_sysinfo,		"sysinfo"		}, /* 116 */
 	{ 6,	0,	sys_ipc,		"ipc"			}, /* 117 */
 	{ 1,	TD,	sys_fsync,		"fsync"			}, /* 118 */
-	{ 1,	TS,	sys_sigreturn,		"sigreturn"		}, /* 119 */
+	{ 0,	TS,	sys_sigreturn,		"sigreturn"		}, /* 119 */
 	{ 5,	TP,	sys_clone,		"clone"			}, /* 120 */
 	{ 2,	0,	sys_setdomainname,	"setdomainname"		}, /* 121 */
 	{ 1,	0,	sys_uname,		"uname"			}, /* 122 */
@@ -229,7 +229,7 @@
 	{ 5,	0,	printargs,		"pciconfig_read"	}, /* 198 */
 	{ 5,	0,	printargs,		"pciconfig_write"	}, /* 199 */
 	{ 3,	0,	printargs,		"pciconfig_iobase"	}, /* 200 */
-	{ 8,	0,	printargs,		"MOL"			}, /* 201 */
+	{ 6,	0,	printargs,		"MOL"			}, /* 201 */
 	{ 3,	TD,	sys_getdents64,		"getdents64"		}, /* 202 */
 	{ 2,	TF,	sys_pivotroot,		"pivot_root"		}, /* 203 */
 	{ 3,	TD,	sys_fcntl,		"fcntl64"		}, /* 204 */
@@ -338,7 +338,7 @@
 	{ 1,	TD,	sys_eventfd,		"eventfd"		}, /* 307 */
 	{ 4,	TD,	printargs,		"sync_file_range"	}, /* 308 */
 	{ 6,	TD,	sys_fallocate,		"fallocate"		}, /* 309 */
-	{ 3,    0,      sys_subpage_prot,       "subpage_prot"          }, /* 310 */
+	{ 3,	0,	sys_subpage_prot,	"subpage_prot"		}, /* 310 */
 	{ 4,	TD,	sys_timerfd_settime,	"timerfd_settime"	}, /* 311 */
 	{ 2,	TD,	sys_timerfd_gettime,	"timerfd_gettime"	}, /* 312 */
 	{ 4,	TD|TS,	sys_signalfd4,		"signalfd4"		}, /* 313 */
@@ -348,8 +348,8 @@
 	{ 2,	TD,	sys_pipe2,		"pipe2"			}, /* 317 */
 	{ 1,	TD,	sys_inotify_init1,	"inotify_init1"		}, /* 318 */
 	{ 5,	TD,	printargs,		"perf_event_open"	}, /* 319 */
-	{ 5,	TD,	printargs,		"preadv"		}, /* 320 */
-	{ 5,	TD,	printargs,		"pwritev"		}, /* 321 */
+	{ 5,	TD,	sys_preadv,		"preadv"		}, /* 320 */
+	{ 5,	TD,	sys_pwritev,		"pwritev"		}, /* 321 */
 	{ 4,	TP|TS,	printargs,		"rt_tgsigqueueinfo"	}, /* 322 */
 	{ 2,	TD,	printargs,		"fanotify_init"		}, /* 323 */
 	{ 5,	TD|TF,	printargs,		"fanotify_mark"		}, /* 324 */
@@ -432,7 +432,7 @@
 #if SYS_socket_subcall != 400
  #error fix me
 #endif
-	{ 8,	0,	printargs,		"socket_subcall"}, /* 400 */
+	{ 6,	0,	printargs,		"socket_subcall"}, /* 400 */
 	{ 3,	TN,	sys_socket,		"socket"	}, /* 401 */
 	{ 3,	TN,	sys_bind,		"bind"		}, /* 402 */
 	{ 3,	TN,	sys_connect,		"connect"	}, /* 403 */

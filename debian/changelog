@@ -3,7 +3,7 @@ strace (4.6-1.1) UNRELEASED; urgency=low
   * Non-maintainer upload.
   * reenable simultaneous -p and command
 
- -- Max Kirillov <max@max630.net>  Wed, 30 Mar 2011 02:46:48 +0300
+ -- Max Kirillov <max@max630.net>  Fri, 19 Aug 2011 23:59:10 +0300
 
 strace (4.6-1) unstable; urgency=low
 

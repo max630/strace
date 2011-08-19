@@ -145,11 +145,11 @@
 	{ 1,	0,	sys_sysinfo,		"sysinfo"	}, /* 116 */
 	{ 6,	0,	sys_ipc,		"ipc"		}, /* 117 */
 	{ 1,	0,	sys_fsync,		"fsync"		}, /* 118 */
-	{ 1,	TS,	sys_sigreturn,		"sigreturn"	}, /* 119 */
+	{ 0,	TS,	sys_sigreturn,		"sigreturn"	}, /* 119 */
 	{ 5,	TP,	sys_clone,		"clone"		}, /* 120 */
 	{ 2,	0,	sys_setdomainname,	"setdomainname"	}, /* 121 */
 	{ 1,	0,	sys_uname,		"uname"		}, /* 122 */
-	{ 3,    0,      sys_modify_ldt,         "modify_ldt"    }, /* 123 */
+	{ 3,	0,	sys_modify_ldt,		"modify_ldt"	}, /* 123 */
 	{ 1,	0,	sys_adjtimex,		"adjtimex"	}, /* 124 */
 	{ 3,	0,	sys_mprotect,		"mprotect"	}, /* 125 */
 	{ 3,	TS,	sys_sigprocmask,	"sigprocmask"	}, /* 126 */
@@ -200,7 +200,7 @@
 	{ 3,	0,	sys_getresgid,		"getresgid"	}, /* 171 */
 	{ 5,	0,	sys_prctl,		"prctl"		}, /* 172 */
 	{ 1,	TS,	printargs,		"rt_sigreturn"	}, /* 173 */
-	{ 4,	TS,	sys_rt_sigaction,	"rt_sigaction"  }, /* 174 */
+	{ 4,	TS,	sys_rt_sigaction,	"rt_sigaction"	}, /* 174 */
 	{ 4,	TS,	sys_rt_sigprocmask,	"rt_sigprocmask"}, /* 175 */
 	{ 2,	TS,	sys_rt_sigpending,	"rt_sigpending"	}, /* 176 */
 	{ 4,	TS,	sys_rt_sigtimedwait,	"rt_sigtimedwait"}, /* 177 */
@@ -265,7 +265,7 @@
 	{ 2,	TF,	sys_removexattr,	"lremovexattr"	}, /* 236 */
 	{ 2,	TD,	sys_fremovexattr,	"fremovexattr"	}, /* 237 */
 	{ 2,	TS,	sys_kill,		"tkill"		}, /* 238 */
-	{ 4,	TF,	sys_sendfile64,		"sendfile64"	}, /* 239 */
+	{ 4,	TD|TN,	sys_sendfile64,		"sendfile64"	}, /* 239 */
 	{ 6,	0,	sys_futex,		"futex"		}, /* 240 */
 	{ 3,	0,	sys_sched_setaffinity,	"sched_setaffinity"}, /* 241 */
 	{ 3,	0,	sys_sched_getaffinity,	"sched_getaffinity"}, /* 242 */
@@ -392,8 +392,8 @@
 	{ 5,	TN,	sys_sendmsg,		"sendmsg"	}, /* 360 */
 	{ 5,	TN,	sys_recvmsg,		"recvmsg"	}, /* 361 */
 	{ 4,	TN,	sys_accept4,		"accept4"	}, /* 362 */
-	{ 5,	TD,	printargs,		"preadv"	}, /* 363 */
-	{ 5,	TD,	printargs,		"pwritev"	}, /* 364 */
+	{ 5,	TD,	sys_preadv,		"preadv"	}, /* 363 */
+	{ 5,	TD,	sys_pwritev,		"pwritev"	}, /* 364 */
 	{ 4,	TP|TS,	printargs,		"rt_tgsigqueueinfo"	}, /* 365 */
 	{ 5,	TN,	printargs,		"perf_event_open"	}, /* 366 */
 	{ 5,	TN,	printargs,		"recvmmsg"	}, /* 367 */

@@ -48,7 +48,7 @@
 # endif
 #endif
 
-/* configuration section */
+/* Configuration section */
 #ifndef MAX_QUALS
 #if defined(LINUX) && defined(MIPS)
 #define MAX_QUALS	7000	/* maximum number of syscalls, signals, etc. */
@@ -57,19 +57,41 @@
 #endif
 #endif
 #ifndef DEFAULT_STRLEN
-#define DEFAULT_STRLEN	32	/* default maximum # of bytes printed in
-				  `printstr', change with `-s' switch */
+/* default maximum # of bytes printed in `printstr', change with -s switch */
+#define DEFAULT_STRLEN	32
 #endif
 #ifndef DEFAULT_ACOLUMN
 #define DEFAULT_ACOLUMN	40	/* default alignment column for results */
 #endif
+
+/* Maximum number of args to a syscall.
+ *
+ * Make sure that all entries in all syscallent.h files
+ * have nargs <= MAX_ARGS!
+ * linux/<ARCH>/syscallent.h: ia64 has many syscalls with
+ * nargs = 8, mips has two with nargs = 7 (both are printargs),
+ * all others are <= 6.
+ * freebsd/i386/syscallent.h: one syscall with nargs = 8
+ * (sys_sendfile, looks legitimate)
+ * and one with nargs = 7 (sys_mmap, maybe it should have 6?).
+ * sunos4/syscallent.h: all are <= 6.
+ * svr4/syscallent.h: all are -1.
+ */
 #ifndef MAX_ARGS
 # ifdef HPPA
-#  define MAX_ARGS	6	/* maximum number of args to a syscall */
+#  define MAX_ARGS	6
+# elif defined X86_64 || defined I386
+#  ifdef FREEBSD
+#   define MAX_ARGS	8
+#  else
+#   define MAX_ARGS	6
+#  endif
 # else
-#  define MAX_ARGS	32	/* maximum number of args to a syscall */
+/* Way too big. Switch your arch to saner size after you tested that it works */
+#  define MAX_ARGS	32
 # endif
 #endif
+
 #ifndef DEFAULT_SORTBY
 #define DEFAULT_SORTBY "time"	/* default sorting method for call profiling */
 #endif
@@ -255,13 +277,12 @@ extern int ptrace(int, int, char *, int, ...);
 
 #ifdef SVR4
 #ifdef HAVE_MP_PROCFS
-extern int mp_ioctl (int f, int c, void *a, int s);
-#define IOCTL(f,c,a)	mp_ioctl (f, c, a, sizeof *a)
+extern int mp_ioctl(int f, int c, void *a, int s);
+#define IOCTL(f,c,a)	mp_ioctl(f, c, a, sizeof *a)
 #define IOCTL_STATUS(t) \
-	 pread (t->pfd_stat, &t->status, sizeof t->status, 0)
-#define IOCTL_WSTOP(t)						\
-	(IOCTL (t->pfd, PCWSTOP, (char *)NULL) < 0 ? -1 :		\
-	 IOCTL_STATUS (t))
+	 pread(t->pfd_stat, &t->status, sizeof t->status, 0)
+#define IOCTL_WSTOP(t) \
+	(IOCTL(t->pfd, PCWSTOP, (char *)NULL) < 0 ? -1 : IOCTL_STATUS(t))
 #define PR_WHY		pr_lwp.pr_why
 #define PR_WHAT		pr_lwp.pr_what
 #define PR_REG		pr_lwp.pr_context.uc_mcontext.gregs
@@ -280,8 +301,8 @@ extern int mp_ioctl (int f, int c, void *a, int s);
 #define PIOCRUN		PCRUN
 #else
 #define IOCTL		ioctl
-#define IOCTL_STATUS(t)	ioctl (t->pfd, PIOCSTATUS, &t->status)
-#define IOCTL_WSTOP(t)	ioctl (t->pfd, PIOCWSTOP, &t->status)
+#define IOCTL_STATUS(t)	ioctl(t->pfd, PIOCSTATUS, &t->status)
+#define IOCTL_WSTOP(t)	ioctl(t->pfd, PIOCWSTOP, &t->status)
 #define PR_WHY		pr_why
 #define PR_WHAT		pr_what
 #define PR_REG		pr_reg
@@ -292,8 +313,8 @@ extern int mp_ioctl (int f, int c, void *a, int s);
 #endif
 #ifdef FREEBSD
 #define IOCTL		ioctl
-#define IOCTL_STATUS(t)	ioctl (t->pfd, PIOCSTATUS, &t->status)
-#define IOCTL_WSTOP(t)	ioctl (t->pfd, PIOCWAIT, &t->status)
+#define IOCTL_STATUS(t)	ioctl(t->pfd, PIOCSTATUS, &t->status)
+#define IOCTL_WSTOP(t)	ioctl(t->pfd, PIOCWAIT, &t->status)
 #define PIOCRUN         PIOCCONT
 #define PIOCWSTOP       PIOCWAIT
 #define PR_WHY		why
@@ -318,6 +339,10 @@ extern int mp_ioctl (int f, int c, void *a, int s);
 # if !HAVE_DECL_PTRACE_GETSIGINFO
 #  define PTRACE_GETSIGINFO	0x4202
 # endif
+
+# if !HAVE_DECL_PTRACE_O_TRACESYSGOOD
+#  define PTRACE_O_TRACESYSGOOD	0x00000001
+# endif
 # if !HAVE_DECL_PTRACE_O_TRACEFORK
 #  define PTRACE_O_TRACEFORK	0x00000002
 # endif
@@ -326,6 +351,12 @@ extern int mp_ioctl (int f, int c, void *a, int s);
 # endif
 # if !HAVE_DECL_PTRACE_O_TRACECLONE
 #  define PTRACE_O_TRACECLONE	0x00000008
+# endif
+# if !HAVE_DECL_PTRACE_O_TRACEEXEC
+#  define PTRACE_O_TRACEEXEC	0x00000010
+# endif
+# if !HAVE_DECL_PTRACE_O_TRACEEXIT
+#  define PTRACE_O_TRACEEXIT	0x00000040
 # endif
 
 # if !HAVE_DECL_PTRACE_EVENT_FORK
@@ -337,7 +368,22 @@ extern int mp_ioctl (int f, int c, void *a, int s);
 # if !HAVE_DECL_PTRACE_EVENT_CLONE
 #  define PTRACE_EVENT_CLONE	3
 # endif
+# if !HAVE_DECL_PTRACE_EVENT_EXEC
+#  define PTRACE_EVENT_EXEC	4
+# endif
+# if !HAVE_DECL_PTRACE_EVENT_VFORK_DONE
+#  define PTRACE_EVENT_VFORK_DONE	5
+# endif
+# if !HAVE_DECL_PTRACE_EVENT_EXIT
+#  define PTRACE_EVENT_EXIT	6
+# endif
 #endif /* LINUX */
+
+#if !defined __GNUC__
+# define __attribute__(x) /*nothing*/
+#endif
+
+#define ARRAY_SIZE(a) (sizeof(a) / sizeof((a)[0]))
 
 /* Trace Control Block */
 struct tcb {
@@ -361,15 +407,6 @@ struct tcb {
 	struct timeval dtime;	/* Delta for system time usage */
 	struct timeval etime;	/* Syscall entry time */
 				/* Support for tracing forked processes */
-	struct tcb *parent;	/* Parent of this process */
-	int nchildren;		/* # of traced children */
-	int waitpid;		/* pid(s) this process is waiting for */
-	int nzombies;		/* # of formerly traced children now dead */
-#ifdef LINUX
-	int nclone_threads;	/* # of nchildren with CLONE_THREAD */
-	int nclone_waiting;	/* clone threads in wait4 (TCB_SUSPENDED) */
-#endif
-				/* (1st arg of wait4()) */
 	long baddr;		/* `Breakpoint' address */
 	long inst[2];		/* Instructions on above */
 	int pfd;		/* proc file descriptor */
@@ -395,12 +432,13 @@ struct tcb {
 #define TCB_INUSE	00002	/* This table entry is in use */
 #define TCB_INSYSCALL	00004	/* A system call is in progress */
 #define TCB_ATTACHED	00010	/* Process is not our own child */
-#define TCB_EXITING	00020	/* As far as we know, this process is exiting */
-#define TCB_SUSPENDED	00040	/* Process can not be allowed to resume just now */
+#ifdef LINUX
+#define TCB_ATTACH_DONE	00020	/* PTRACE_ATTACH was done on this tcb->pid */
+#endif
 #define TCB_BPTSET	00100	/* "Breakpoint" set after fork(2) */
 #define TCB_SIGTRAPPED	00200	/* Process wanted to block SIGTRAP */
-#define TCB_FOLLOWFORK	00400	/* Process should have forks followed */
 #define TCB_REPRINT	01000	/* We should reprint this syscall on exit */
+#define TCB_FILTERED	02000	/* This system call has been filtered out */
 #ifdef LINUX
 /* x86 does not need TCB_WAITEXECVE.
  * It can detect execve's SIGTRAP by looking at eax/rax.
@@ -410,10 +448,8 @@ struct tcb {
   || defined(POWERPC) || defined(IA64) || defined(HPPA) \
   || defined(SH) || defined(SH64) || defined(S390) || defined(S390X) \
   || defined(ARM) || defined(MIPS) || defined(BFIN) || defined(TILE)
-#  define TCB_WAITEXECVE 02000	/* ignore SIGTRAP after exceve */
+#  define TCB_WAITEXECVE 04000	/* ignore SIGTRAP after execve */
 # endif
-# define TCB_CLONE_THREAD  010000 /* CLONE_THREAD set in creating syscall */
-# define TCB_GROUP_EXITING 020000 /* TCB_EXITING was exit_group, not _exit */
 # include <sys/syscall.h>
 # ifndef __NR_exit_group
 # /* Hack: Most headers around are too old to have __NR_exit_group.  */
@@ -452,6 +488,7 @@ struct tcb {
 #define syserror(tcp)	((tcp)->u_error != 0)
 #define verbose(tcp)	(qual_flags[(tcp)->scno] & QUAL_VERBOSE)
 #define abbrev(tcp)	(qual_flags[(tcp)->scno] & QUAL_ABBREV)
+#define filtered(tcp)	((tcp)->flags & TCB_FILTERED)
 
 struct xlat {
 	int val;
@@ -499,25 +536,27 @@ typedef enum {
 	CFLAG_BOTH
 } cflag_t;
 
-extern struct tcb **tcbtab;
 extern int *qual_flags;
 extern int debug, followfork;
 extern unsigned int ptrace_setoptions;
 extern int dtime, xflag, qflag;
 extern cflag_t cflag;
 extern int acolumn;
-extern unsigned int nprocs, tcbtabsize;
 extern int max_strlen;
 extern struct tcb *tcp_last;
 
 enum bitness_t { BITNESS_CURRENT = 0, BITNESS_32 };
+
+void error_msg(const char *fmt, ...) __attribute__ ((format(printf, 1, 2)));
+void perror_msg(const char *fmt, ...) __attribute__ ((format(printf, 1, 2)));
+void error_msg_and_die(const char *fmt, ...) __attribute__ ((noreturn, format(printf, 1, 2)));
+void perror_msg_and_die(const char *fmt, ...) __attribute__ ((noreturn, format(printf, 1, 2)));
 
 extern int set_personality(int personality);
 extern const char *xlookup(const struct xlat *, int);
 extern struct tcb *alloc_tcb(int, int);
 extern struct tcb *pid2tcb(int);
 extern void droptcb(struct tcb *);
-extern void expand_tcbtab(void);
 
 #define alloctcb(pid)	alloc_tcb((pid), 1)
 
@@ -533,7 +572,7 @@ extern int trace_syscall(struct tcb *);
 extern int count_syscall(struct tcb *, struct timeval *);
 extern void printxval(const struct xlat *, int, const char *);
 extern int printargs(struct tcb *);
-extern int addflags(const struct xlat *, int);
+extern void addflags(const struct xlat *, int);
 extern int printflags(const struct xlat *, int, const char *);
 extern const char *sprintflags(const char *, const struct xlat *, int);
 extern int umoven(struct tcb *, long, int, char *);
@@ -553,14 +592,23 @@ extern void sprint_timespec(char *, struct tcb *, long);
 #ifdef HAVE_SIGINFO_T
 extern void printsiginfo(siginfo_t *, int);
 #endif
+extern const char *getfdpath(struct tcb *, int);
 extern void printfd(struct tcb *, int);
 extern void printsock(struct tcb *, long, int);
 extern void print_sock_optmgmt(struct tcb *, long, int);
 extern void printrusage(struct tcb *, long);
+#ifdef ALPHA
+extern void printrusage32(struct tcb *, long);
+#endif
 extern void printuid(const char *, unsigned long);
 extern int clearbpt(struct tcb *);
+/*
+ * On Linux, "setbpt" is a misnomer: we don't set a breakpoint
+ * (IOW: no poking in user's text segment),
+ * instead we change fork/vfork/clone into clone(CLONE_PTRACE).
+ * On newer kernels, we use PTRACE_O_TRACECLONE/TRACE[V]FORK instead.
+ */
 extern int setbpt(struct tcb *);
-extern int sigishandled(struct tcb *, int);
 extern void printcall(struct tcb *);
 extern const char *signame(int);
 extern void print_sigset(struct tcb *, long, int);
@@ -569,16 +617,17 @@ extern void printleader(struct tcb *);
 extern void printtrailer(void);
 extern void tabto(int);
 extern void call_summary(FILE *);
-extern void tprint_iov(struct tcb *, unsigned long, unsigned long);
+extern void tprint_iov(struct tcb *, unsigned long, unsigned long, int decode_iov);
 extern void tprint_open_modes(mode_t);
 extern const char *sprint_open_modes(mode_t);
 extern int is_restart_error(struct tcb *);
 
+extern int pathtrace_select(const char *);
+extern int pathtrace_match(struct tcb *);
+
 extern int change_syscall(struct tcb *, int);
 extern int internal_fork(struct tcb *);
 extern int internal_exec(struct tcb *);
-extern int internal_wait(struct tcb *, int);
-extern int internal_exit(struct tcb *);
 #ifdef LINUX
 extern int handle_new_child(struct tcb *, int, int);
 #endif
@@ -623,11 +672,7 @@ extern int proc_open(struct tcb *tcp, int attaching);
 #define printtv_special(tcp, addr)	\
 	printtv_bitness((tcp), (addr), BITNESS_CURRENT, 1)
 
-extern void tprintf(const char *fmt, ...)
-#ifdef __GNUC__
-	__attribute__ ((format (printf, 1, 2)))
-#endif
-	;
+extern void tprintf(const char *fmt, ...) __attribute__ ((format (printf, 1, 2)));
 
 #ifndef HAVE_STRERROR
 const char *strerror(int);
@@ -706,3 +751,5 @@ extern long ia32;
 #endif
 
 extern int not_failing_only;
+extern int show_fd_path;
+extern int tracing_paths;

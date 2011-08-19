@@ -94,15 +94,13 @@
 #endif
 
 int
-tv_nz(a)
-struct timeval *a;
+tv_nz(struct timeval *a)
 {
 	return a->tv_sec || a->tv_usec;
 }
 
 int
-tv_cmp(a, b)
-struct timeval *a, *b;
+tv_cmp(struct timeval *a, struct timeval *b)
 {
 	if (a->tv_sec < b->tv_sec
 	    || (a->tv_sec == b->tv_sec && a->tv_usec < b->tv_usec))
@@ -114,15 +112,13 @@ struct timeval *a, *b;
 }
 
 double
-tv_float(tv)
-struct timeval *tv;
+tv_float(struct timeval *tv)
 {
 	return tv->tv_sec + tv->tv_usec/1000000.0;
 }
 
 void
-tv_add(tv, a, b)
-struct timeval *tv, *a, *b;
+tv_add(struct timeval *tv, struct timeval *a, struct timeval *b)
 {
 	tv->tv_sec = a->tv_sec + b->tv_sec;
 	tv->tv_usec = a->tv_usec + b->tv_usec;
@@ -133,8 +129,7 @@ struct timeval *tv, *a, *b;
 }
 
 void
-tv_sub(tv, a, b)
-struct timeval *tv, *a, *b;
+tv_sub(struct timeval *tv, struct timeval *a, struct timeval *b)
 {
 	tv->tv_sec = a->tv_sec - b->tv_sec;
 	tv->tv_usec = a->tv_usec - b->tv_usec;
@@ -145,9 +140,7 @@ struct timeval *tv, *a, *b;
 }
 
 void
-tv_div(tv, a, n)
-struct timeval *tv, *a;
-int n;
+tv_div(struct timeval *tv, struct timeval *a, int n)
 {
 	tv->tv_usec = (a->tv_sec % n * 1000000 + a->tv_usec + n / 2) / n;
 	tv->tv_sec = a->tv_sec / n + tv->tv_usec / 1000000;
@@ -155,9 +148,7 @@ int n;
 }
 
 void
-tv_mul(tv, a, n)
-struct timeval *tv, *a;
-int n;
+tv_mul(struct timeval *tv, struct timeval *a, int n)
 {
 	tv->tv_usec = a->tv_usec * n;
 	tv->tv_sec = a->tv_sec * n + tv->tv_usec / 1000000;
@@ -252,9 +243,10 @@ printllval(struct tcb *tcp, const char *format, int llarg)
 {
 # if defined(FREEBSD) \
      || (defined(LINUX) && defined(POWERPC) && !defined(POWERPC64)) \
-     || defined (LINUX_MIPSO32)
+     || defined(LINUX_MIPSO32) \
+     || defined(__ARM_EABI__)
 	/* Align 64bit argument to 64bit boundary.  */
-	if (llarg % 2) llarg++;
+	llarg = (llarg + 1) & 0x1e;
 # endif
 # if defined LINUX && (defined X86_64 || defined POWERPC64)
 	if (current_personality == 0) {
@@ -263,7 +255,7 @@ printllval(struct tcb *tcp, const char *format, int llarg)
 	} else {
 #  ifdef POWERPC64
 		/* Align 64bit argument to 64bit boundary.  */
-		if (llarg % 2) llarg++;
+		llarg = (llarg + 1) & 0x1e;
 #  endif
 		tprintf(format, LONG_LONG(tcp->u_arg[llarg], tcp->u_arg[llarg + 1]));
 		llarg += 2;
@@ -287,29 +279,22 @@ printllval(struct tcb *tcp, const char *format, int llarg)
  * print the entries whose bits are on in `flags'
  * return # of flags printed.
  */
-int
-addflags(xlat, flags)
-const struct xlat *xlat;
-int flags;
+void
+addflags(const struct xlat *xlat, int flags)
 {
-	int n;
-
-	for (n = 0; xlat->str; xlat++) {
+	for (; xlat->str; xlat++) {
 		if (xlat->val && (flags & xlat->val) == xlat->val) {
 			tprintf("|%s", xlat->str);
 			flags &= ~xlat->val;
-			n++;
 		}
 	}
 	if (flags) {
 		tprintf("|%#x", flags);
-		n++;
 	}
-	return n;
 }
 
 /*
- * Interpret `xlat' as an array of flags/
+ * Interpret `xlat' as an array of flags.
  * Print to static string the entries whose bits are on in `flags'
  * Return static string.
  */
@@ -418,13 +403,16 @@ printnum_int(struct tcb *tcp, long addr, const char *fmt)
 void
 printfd(struct tcb *tcp, int fd)
 {
-	tprintf("%d", fd);
+	const char *p;
+
+	if (show_fd_path && (p = getfdpath(tcp, fd)))
+		tprintf("%d<%s>", fd, p);
+	else
+		tprintf("%d", fd);
 }
 
 void
-printuid(text, uid)
-const char *text;
-unsigned long uid;
+printuid(const char *text, unsigned long uid)
 {
 	tprintf("%s", text);
 	tprintf((uid == -1) ? "%ld" : "%lu", uid);
@@ -639,10 +627,7 @@ printstr(struct tcb *tcp, long addr, int len)
 
 #if HAVE_SYS_UIO_H
 void
-dumpiov(tcp, len, addr)
-struct tcb * tcp;
-int len;
-long addr;
+dumpiov(struct tcb *tcp, int len, long addr)
 {
 #if defined(LINUX) && SUPPORTED_PERSONALITIES > 1
 	union {
@@ -693,10 +678,7 @@ long addr;
 #endif
 
 void
-dumpstr(tcp, addr, len)
-struct tcb *tcp;
-long addr;
-int len;
+dumpstr(struct tcb *tcp, long addr, int len)
 {
 	static int strsize = -1;
 	static unsigned char *str;
@@ -859,7 +841,7 @@ umovestr(struct tcb *tcp, long addr, int len, char *laddr)
 	   hardware page size).  Assume all pages >= 1024 (a-historical
 	   I know) */
 
-	int page = 1024; 	/* How to find this? */
+	int page = 1024;	/* How to find this? */
 	int move = page - (addr & (page - 1));
 	int left = len;
 
@@ -869,7 +851,7 @@ umovestr(struct tcb *tcp, long addr, int len, char *laddr)
 		if (move > left) move = left;
 		if ((move = read(fd, laddr, move)) <= 0)
 			return left != len ? 0 : -1;
-		if (memchr (laddr, 0, move)) break;
+		if (memchr(laddr, 0, move)) break;
 		left -= move;
 		laddr += move;
 		addr += move;
@@ -900,7 +882,7 @@ umovestr(struct tcb *tcp, long addr, int len, char *laddr)
 			return -1;
 		}
 		started = 1;
-		memcpy(laddr, &u.x[n], m = MIN(sizeof(long)-n,len));
+		memcpy(laddr, &u.x[n], m = MIN(sizeof(long)-n, len));
 		while (n & (sizeof(long) - 1))
 			if (u.x[n++] == '\0')
 				return 0;
@@ -940,12 +922,7 @@ umovestr(struct tcb *tcp, long addr, int len, char *laddr)
 #ifdef SUNOS4
 
 static int
-uload(cmd, pid, addr, len, laddr)
-int cmd;
-int pid;
-long addr;
-int len;
-char *laddr;
+uload(int cmd, int pid, long addr, int len, char *laddr)
 {
 	int peek, poke;
 	int n, m;
@@ -993,20 +970,13 @@ char *laddr;
 }
 
 int
-tload(pid, addr, len, laddr)
-int pid;
-int addr, len;
-char *laddr;
+tload(int pid, int addr, int len, char *laddr)
 {
 	return uload(PTRACE_WRITETEXT, pid, addr, len, laddr);
 }
 
 int
-dload(pid, addr, len, laddr)
-int pid;
-int addr;
-int len;
-char *laddr;
+dload(int pid, int addr, int len, char *laddr)
 {
 	return uload(PTRACE_WRITEDATA, pid, addr, len, laddr);
 }
@@ -1016,10 +986,7 @@ char *laddr;
 #ifndef USE_PROCFS
 
 int
-upeek(tcp, off, res)
-struct tcb *tcp;
-long off;
-long *res;
+upeek(struct tcb *tcp, long off, long *res)
 {
 	long val;
 
@@ -1051,7 +1018,7 @@ long *res;
 	if (val == -1 && errno) {
 		if (errno != ESRCH) {
 			char buf[60];
-			sprintf(buf,"upeek: ptrace(PTRACE_PEEKUSER,%d,%lu,0)", tcp->pid, off);
+			sprintf(buf, "upeek: ptrace(PTRACE_PEEKUSER,%d,%lu,0)", tcp->pid, off);
 			perror(buf);
 		}
 		return -1;
@@ -1081,7 +1048,7 @@ printcall(struct tcb *tcp)
 
 # elif defined(S390) || defined(S390X)
 	long psw;
-	if(upeek(tcp,PT_PSWADDR,&psw) < 0) {
+	if (upeek(tcp, PT_PSWADDR, &psw) < 0) {
 		PRINTBADPC;
 		return;
 	}
@@ -1123,7 +1090,7 @@ printcall(struct tcb *tcp)
 	long pc;
 
 	if (upeek(tcp, 4*PT_PC, &pc) < 0) {
-		tprintf ("[????????] ");
+		tprintf("[????????] ");
 		return;
 	}
 	tprintf("[%08lx] ", pc);
@@ -1131,13 +1098,13 @@ printcall(struct tcb *tcp)
 	long pc;
 
 	if (upeek(tcp, REG_PC, &pc) < 0) {
-		tprintf ("[????????????????] ");
+		tprintf("[????????????????] ");
 		return;
 	}
 	tprintf("[%08lx] ", pc);
 # elif defined(SPARC) || defined(SPARC64)
 	struct pt_regs regs;
-	if (ptrace(PTRACE_GETREGS,tcp->pid,(char *)&regs,0) < 0) {
+	if (ptrace(PTRACE_GETREGS, tcp->pid, (char *)&regs, 0) < 0) {
 		PRINTBADPC;
 		return;
 	}
@@ -1149,8 +1116,8 @@ printcall(struct tcb *tcp)
 # elif defined(HPPA)
 	long pc;
 
-	if(upeek(tcp,PT_IAOQ0,&pc) < 0) {
-		tprintf ("[????????] ");
+	if (upeek(tcp, PT_IAOQ0, &pc) < 0) {
+		tprintf("[????????] ");
 		return;
 	}
 	tprintf("[%08lx] ", pc);
@@ -1158,7 +1125,7 @@ printcall(struct tcb *tcp)
 	long pc;
 
 	if (upeek(tcp, REG_EPC, &pc) < 0) {
-		tprintf ("[????????] ");
+		tprintf("[????????] ");
 		return;
 	}
 	tprintf("[%08lx] ", pc);
@@ -1166,7 +1133,7 @@ printcall(struct tcb *tcp)
 	long pc;
 
 	if (upeek(tcp, 4*REG_PC, &pc) < 0) {
-		tprintf ("[????????] ");
+		tprintf("[????????] ");
 		return;
 	}
 	tprintf("[%08lx] ", pc);
@@ -1174,7 +1141,7 @@ printcall(struct tcb *tcp)
 	long pc;
 
 	if (upeek(tcp, REG_PC, &pc) < 0) {
-		tprintf ("[????????????????] ");
+		tprintf("[????????????????] ");
 		return;
 	}
 	tprintf("[%08lx] ", pc);
@@ -1251,7 +1218,7 @@ printcall(struct tcb *tcp)
  */
 #ifndef USE_PROCFS
 
-#ifdef LINUX
+# ifdef LINUX
 
 #  include "syscall.h"
 
@@ -1307,28 +1274,28 @@ arg_setup(struct tcb *tcp, arg_setup_state *state)
 
 #   ifdef SYS_fork
 static int
-get_arg0 (struct tcb *tcp, arg_setup_state *state, long *valp)
+get_arg0(struct tcb *tcp, arg_setup_state *state, long *valp)
 {
 	int ret;
 
 	if (ia32)
-		ret = upeek (tcp, PT_R11, valp);
+		ret = upeek(tcp, PT_R11, valp);
 	else
-		ret = umoven (tcp,
+		ret = umoven(tcp,
 			      (unsigned long) ia64_rse_skip_regs(*state, 0),
 			      sizeof(long), (void *) valp);
 	return ret;
 }
 
 static int
-get_arg1 (struct tcb *tcp, arg_setup_state *state, long *valp)
+get_arg1(struct tcb *tcp, arg_setup_state *state, long *valp)
 {
 	int ret;
 
 	if (ia32)
-		ret = upeek (tcp, PT_R9, valp);
+		ret = upeek(tcp, PT_R9, valp);
 	else
-		ret = umoven (tcp,
+		ret = umoven(tcp,
 			      (unsigned long) ia64_rse_skip_regs(*state, 1),
 			      sizeof(long), (void *) valp);
 	return ret;
@@ -1336,7 +1303,7 @@ get_arg1 (struct tcb *tcp, arg_setup_state *state, long *valp)
 #   endif
 
 static int
-set_arg0 (struct tcb *tcp, arg_setup_state *state, long val)
+set_arg0(struct tcb *tcp, arg_setup_state *state, long val)
 {
 	int req = PTRACE_POKEDATA;
 	void *ap;
@@ -1352,7 +1319,7 @@ set_arg0 (struct tcb *tcp, arg_setup_state *state, long val)
 }
 
 static int
-set_arg1 (struct tcb *tcp, arg_setup_state *state, long val)
+set_arg1(struct tcb *tcp, arg_setup_state *state, long val)
 {
 	int req = PTRACE_POKEDATA;
 	void *ap;
@@ -1378,9 +1345,9 @@ set_arg1 (struct tcb *tcp, arg_setup_state *state, long val)
 typedef struct pt_regs arg_setup_state;
 
 #   define arg_setup(tcp, state) \
-    (ptrace (PTRACE_GETREGS, tcp->pid, (char *) (state), 0))
+    (ptrace(PTRACE_GETREGS, tcp->pid, (char *) (state), 0))
 #   define arg_finish_change(tcp, state) \
-    (ptrace (PTRACE_SETREGS, tcp->pid, (char *) (state), 0))
+    (ptrace(PTRACE_SETREGS, tcp->pid, (char *) (state), 0))
 
 #   define get_arg0(tcp, state, valp) (*(valp) = (state)->u_regs[U_REG_O0], 0)
 #   define get_arg1(tcp, state, valp) (*(valp) = (state)->u_regs[U_REG_O1], 0)
@@ -1445,20 +1412,20 @@ typedef int arg_setup_state;
 #   define arg_setup(tcp, state) (0)
 #   define arg_finish_change(tcp, state)	0
 #   define get_arg0(tcp, cookie, valp) \
-    (upeek ((tcp), arg0_offset, (valp)))
+    (upeek((tcp), arg0_offset, (valp)))
 #   define get_arg1(tcp, cookie, valp) \
-    (upeek ((tcp), arg1_offset, (valp)))
+    (upeek((tcp), arg1_offset, (valp)))
 
 static int
-set_arg0 (struct tcb *tcp, void *cookie, long val)
+set_arg0(struct tcb *tcp, void *cookie, long val)
 {
-	return ptrace (PTRACE_POKEUSER, tcp->pid, (char*)arg0_offset, val);
+	return ptrace(PTRACE_POKEUSER, tcp->pid, (char*)arg0_offset, val);
 }
 
 static int
-set_arg1 (struct tcb *tcp, void *cookie, long val)
+set_arg1(struct tcb *tcp, void *cookie, long val)
 {
-	return ptrace (PTRACE_POKEUSER, tcp->pid, (char*)arg1_offset, val);
+	return ptrace(PTRACE_POKEUSER, tcp->pid, (char*)arg1_offset, val);
 }
 
 #  endif /* architectures */
@@ -1508,13 +1475,13 @@ setbpt(struct tcb *tcp)
 	case SYS_fork:
 #  endif
 #  if defined SYS_fork || defined SYS_vfork
-		if (arg_setup (tcp, &state) < 0
-		    || get_arg0 (tcp, &state, &tcp->inst[0]) < 0
-		    || get_arg1 (tcp, &state, &tcp->inst[1]) < 0
+		if (arg_setup(tcp, &state) < 0
+		    || get_arg0(tcp, &state, &tcp->inst[0]) < 0
+		    || get_arg1(tcp, &state, &tcp->inst[1]) < 0
 		    || change_syscall(tcp, clone_scno[current_personality]) < 0
-		    || set_arg0 (tcp, &state, CLONE_PTRACE|SIGCHLD) < 0
-		    || set_arg1 (tcp, &state, 0) < 0
-		    || arg_finish_change (tcp, &state) < 0)
+		    || set_arg0(tcp, &state, CLONE_PTRACE|SIGCHLD) < 0
+		    || set_arg1(tcp, &state, 0) < 0
+		    || arg_finish_change(tcp, &state) < 0)
 			return -1;
 		tcp->u_arg[arg0_index] = CLONE_PTRACE|SIGCHLD;
 		tcp->u_arg[arg1_index] = 0;
@@ -1522,9 +1489,9 @@ setbpt(struct tcb *tcp)
 		return 0;
 #  endif
 
-	case SYS_clone:
+	case SYS_clone: ;
 #  ifdef SYS_clone2
-	case SYS_clone2:
+	case SYS_clone2: ;
 #  endif
 		/* ia64 calls directly `clone (CLONE_VFORK | CLONE_VM)'
 		   contrary to x86 SYS_vfork above.  Even on x86 we turn the
@@ -1534,12 +1501,12 @@ setbpt(struct tcb *tcp)
 		   clear also CLONE_VM but only in the CLONE_VFORK case as
 		   otherwise we would break pthread_create.  */
 
-		if ((arg_setup (tcp, &state) < 0
-		    || set_arg0 (tcp, &state,
-				 (tcp->u_arg[arg0_index] | CLONE_PTRACE)
-				 & ~(tcp->u_arg[arg0_index] & CLONE_VFORK
-				     ? CLONE_VFORK | CLONE_VM : 0)) < 0
-		    || arg_finish_change (tcp, &state) < 0))
+		long new_arg0 = (tcp->u_arg[arg0_index] | CLONE_PTRACE);
+		if (new_arg0 & CLONE_VFORK)
+			new_arg0 &= ~(unsigned long)(CLONE_VFORK | CLONE_VM);
+		if (arg_setup(tcp, &state) < 0
+		 || set_arg0(tcp, &state, new_arg0) < 0
+		 || arg_finish_change(tcp, &state) < 0)
 			return -1;
 		tcp->flags |= TCB_BPTSET;
 		tcp->inst[0] = tcp->u_arg[arg0_index];
@@ -1556,15 +1523,15 @@ setbpt(struct tcb *tcp)
 }
 
 int
-clearbpt(tcp)
-struct tcb *tcp;
+clearbpt(struct tcb *tcp)
 {
 	arg_setup_state state;
-	if (arg_setup (tcp, &state) < 0
-	    || restore_arg0 (tcp, &state, tcp->inst[0]) < 0
-	    || restore_arg1 (tcp, &state, tcp->inst[1]) < 0
-	    || arg_finish_change (tcp, &state))
-		if (errno != ESRCH) return -1;
+	if (arg_setup(tcp, &state) < 0
+	    || restore_arg0(tcp, &state, tcp->inst[0]) < 0
+	    || restore_arg1(tcp, &state, tcp->inst[1]) < 0
+	    || arg_finish_change(tcp, &state))
+		if (errno != ESRCH)
+			return -1;
 	tcp->flags &= ~TCB_BPTSET;
 	return 0;
 }
@@ -1572,8 +1539,7 @@ struct tcb *tcp;
 # else /* !defined LINUX */
 
 int
-setbpt(tcp)
-struct tcb *tcp;
+setbpt(struct tcb *tcp)
 {
 #  ifdef SUNOS4
 #   ifdef SPARC	/* This code is slightly sparc specific */
@@ -1628,8 +1594,7 @@ struct tcb *tcp;
 }
 
 int
-clearbpt(tcp)
-struct tcb *tcp;
+clearbpt(struct tcb *tcp)
 {
 #  ifdef SUNOS4
 #   ifdef SPARC
@@ -1692,9 +1657,7 @@ struct tcb *tcp;
 #ifdef SUNOS4
 
 static int
-getex(tcp, hdr)
-struct tcb *tcp;
-struct exec *hdr;
+getex(struct tcb *tcp, struct exec *hdr)
 {
 	int n;
 
@@ -1714,8 +1677,7 @@ struct exec *hdr;
 }
 
 int
-fixvfork(tcp)
-struct tcb *tcp;
+fixvfork(struct tcb *tcp)
 {
 	int pid = tcp->pid;
 	/*

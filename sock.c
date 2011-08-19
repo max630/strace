@@ -68,10 +68,7 @@ static const struct xlat iffflags[] = {
 
 
 static void
-print_addr(tcp, addr, ifr)
-struct tcb *tcp;
-long addr;
-struct ifreq *ifr;
+print_addr(struct tcb *tcp, long addr, struct ifreq *ifr)
 {
 	if (ifr->ifr_addr.sa_family == AF_INET) {
 		struct sockaddr_in *sinp;
@@ -193,7 +190,7 @@ sock_ioctl(struct tcb *tcp, long code, long arg)
 					  "AF_???");
 				tprintf(", ");
 				print_addr(tcp, ((long) tcp->u_arg[2]
-						 + offsetof (struct ifreq,
+						 + offsetof(struct ifreq,
 							     ifr_addr.sa_data)),
 					   &ifr);
 				tprintf("}");
@@ -276,7 +273,7 @@ sock_ioctl(struct tcb *tcp, long code, long arg)
 						  "AF_???");
 					tprintf(", ");
 					print_addr(tcp, ((long) tcp->u_arg[2]
-							 + offsetof (struct ifreq,
+							 + offsetof(struct ifreq,
 								     ifr_addr.sa_data)
 							 + ((char *) &ifra[i]
 							    - (char *) &ifra[0])),

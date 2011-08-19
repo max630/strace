@@ -395,7 +395,7 @@ sys_fcntl(struct tcb *tcp)
 			printflock(tcp, tcp->u_arg[2], 1);
 			break;
 #if _LFS64_LARGEFILE
-#if defined(F_GETLK64) && F_GETLK64+0!=F_GETLK
+#if defined(F_GETLK64) && F_GETLK64+0 != F_GETLK
 		case F_GETLK64:
 #endif
 			tprintf(", ");
@@ -531,8 +531,7 @@ decode_select(struct tcb *tcp, long *args, enum bitness_t bitness)
 		tprintf(", ");
 		printtv_bitness(tcp, args[4], bitness, 0);
 	}
-	else
-	{
+	else {
 		unsigned int cumlen = 0;
 		const char *sep = "";
 
@@ -815,6 +814,56 @@ sys_io_destroy(struct tcb *tcp)
 	return 0;
 }
 
+#ifdef HAVE_LIBAIO_H
+
+enum iocb_sub {
+	SUB_NONE, SUB_COMMON, SUB_POLL, SUB_VECTOR
+};
+
+static const char *
+iocb_cmd_lookup(unsigned cmd, enum iocb_sub *sub)
+{
+	static char buf[sizeof("%u /* SUB_??? */") + sizeof(int)*3];
+	static const struct {
+		const char *name;
+		enum iocb_sub sub;
+	} cmds[] = {
+		{ "pread", SUB_COMMON },
+		{ "pwrite", SUB_COMMON },
+		{ "fsync", SUB_NONE },
+		{ "fdsync", SUB_NONE },
+		{ "op4", SUB_NONE },
+		{ "poll", SUB_POLL },
+		{ "noop", SUB_NONE },
+		{ "preadv", SUB_VECTOR },
+		{ "pwritev", SUB_VECTOR },
+	};
+
+	if (cmd < ARRAY_SIZE(cmds)) {
+		*sub = cmds[cmd].sub;
+		return cmds[cmd].name;
+	}
+	*sub = SUB_NONE;
+	sprintf(buf, "%u /* SUB_??? */", cmd);
+	return buf;
+}
+
+/* Not defined in libaio.h */
+#ifndef IOCB_RESFD
+# define IOCB_RESFD (1 << 0)
+#endif
+
+static void
+print_common_flags(struct iocb *iocb)
+{
+	if (iocb->u.c.flags & IOCB_RESFD)
+		tprintf("resfd=%d, ", iocb->u.c.resfd);
+	if (iocb->u.c.flags & ~IOCB_RESFD)
+		tprintf("flags=%x, ", iocb->u.c.flags);
+}
+
+#endif /* HAVE_LIBAIO_H */
+
 int
 sys_io_submit(struct tcb *tcp)
 {
@@ -831,6 +880,7 @@ sys_io_submit(struct tcb *tcp)
 			struct iocb *iocbp, **iocbs = (void *)tcp->u_arg[2];
 
 			for (i = 0; i < nr; i++, iocbs++) {
+				enum iocb_sub sub;
 				struct iocb iocb;
 				if (i == 0)
 					tprintf("{");
@@ -842,15 +892,49 @@ sys_io_submit(struct tcb *tcp)
 					tprintf("{...}");
 					continue;
 				}
-				tprintf("{%p, %u, %hu, %hu, %d}",
-					iocb.data, iocb.key,
-					iocb.aio_lio_opcode,
-					iocb.aio_reqprio, iocb.aio_fildes);
+				tprintf("{");
+				if (iocb.data)
+					tprintf("data:%p, ", iocb.data);
+				if (iocb.key)
+					tprintf("key:%u, ", iocb.key);
+				tprintf("%s, ", iocb_cmd_lookup(iocb.aio_lio_opcode, &sub));
+				if (iocb.aio_reqprio)
+					tprintf("reqprio:%d, ", iocb.aio_reqprio);
+				tprintf("filedes:%d", iocb.aio_fildes);
+				switch (sub) {
+				case SUB_COMMON:
+					if (iocb.aio_lio_opcode == IO_CMD_PWRITE) {
+						tprintf(", str:");
+						printstr(tcp, (unsigned long)iocb.u.c.buf,
+							 iocb.u.c.nbytes);
+					} else {
+						tprintf(", buf:%p", iocb.u.c.buf);
+					}
+					tprintf(", nbytes:%lu, offset:%llx",
+						iocb.u.c.nbytes,
+						iocb.u.c.offset);
+					print_common_flags(&iocb);
+					break;
+				case SUB_VECTOR:
+					tprintf(", %llx, ", iocb.u.v.offset);
+					print_common_flags(&iocb);
+					tprint_iov(tcp, iocb.u.v.nr,
+						   (unsigned long)iocb.u.v.vec,
+						   iocb.aio_lio_opcode == IO_CMD_PWRITEV);
+					break;
+				case SUB_POLL:
+					tprintf(", %x", iocb.u.poll.events);
+					break;
+				case SUB_NONE:
+				        break;
+				}
+				tprintf("}");
 			}
 			if (i)
 				tprintf("}");
 #else
-			tprintf("{...}");
+#warning "libaio-devel is not available => no io_submit decoding"
+			tprintf("%#lx", tcp->u_arg[2]);
 #endif
 		}
 	}

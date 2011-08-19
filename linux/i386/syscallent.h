@@ -147,7 +147,7 @@
 	{ 1,	0,	sys_sysinfo,		"sysinfo"	}, /* 116 */
 	{ 6,	0,	sys_ipc,		"ipc", SYS_ipc }, /* 117 */
 	{ 1,	TD,	sys_fsync,		"fsync"		}, /* 118 */
-	{ 1,	TS,	sys_sigreturn,		"sigreturn"	}, /* 119 */
+	{ 0,	TS,	sys_sigreturn,		"sigreturn"	}, /* 119 */
 	{ 5,	TP,	sys_clone,		"clone", SYS_clone }, /* 120 */
 	{ 2,	0,	sys_setdomainname,	"setdomainname"	}, /* 121 */
 	{ 1,	0,	sys_uname,		"uname"		}, /* 122 */
@@ -201,8 +201,8 @@
 	{ 3,	0,	sys_setresgid,		"setresgid"	}, /* 170 */
 	{ 3,	0,	sys_getresgid,		"getresgid"	}, /* 171 */
 	{ 5,	0,	sys_prctl,		"prctl"		}, /* 172 */
-	{ 1,	TS,	printargs,		"rt_sigreturn"	}, /* 173 */
-	{ 4,	TS,	sys_rt_sigaction,	"rt_sigaction"  }, /* 174 */
+	{ 0,	TS,	printargs,		"rt_sigreturn"	}, /* 173 */
+	{ 4,	TS,	sys_rt_sigaction,	"rt_sigaction"	}, /* 174 */
 	{ 4,	TS,	sys_rt_sigprocmask,	"rt_sigprocmask"}, /* 175 */
 	{ 2,	TS,	sys_rt_sigpending,	"rt_sigpending"	}, /* 176 */
 	{ 4,	TS,	sys_rt_sigtimedwait,	"rt_sigtimedwait"}, /* 177 */
@@ -363,8 +363,8 @@
 	{ 3,	TD,	sys_dup3,		"dup3"		}, /* 330 */
 	{ 2,	TD,	sys_pipe2,		"pipe2"		}, /* 331 */
 	{ 1,	TD,	sys_inotify_init1,	"inotify_init1"	}, /* 332 */
-	{ 5,	TD,	printargs,		"preadv"	}, /* 333 */
-	{ 5,	TD,	printargs,		"pwritev"	}, /* 334 */
+	{ 5,	TD,	sys_preadv,		"preadv"	}, /* 333 */
+	{ 5,	TD,	sys_pwritev,		"pwritev"	}, /* 334 */
 	{ 4,	TP|TS,	printargs,		"rt_tgsigqueueinfo"}, /* 335 */
 	{ 5,	TD,	printargs,		"perf_event_open"}, /* 336 */
 	{ 5,	TN,	sys_recvmmsg,		"recvmmsg"	}, /* 337 */
@@ -434,7 +434,7 @@
 #if SYS_socket_subcall != 400
  #error fix me
 #endif
-	{ 8,	0,	printargs,		"socket_subcall"}, /* 400 */
+	{ 6,	0,	printargs,		"socket_subcall"}, /* 400 */
 	{ 3,	TN,	sys_socket,		"socket"	}, /* 401 */
 	{ 3,	TN,	sys_bind,		"bind"		}, /* 402 */
 	{ 3,	TN,	sys_connect,		"connect"	}, /* 403 */

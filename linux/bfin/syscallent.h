@@ -147,7 +147,7 @@
 	{ 1,	0,	sys_sysinfo,		"sysinfo"	}, /* 116 */
 	{ 6,	0,	sys_ipc,		"ipc"		}, /* 117 */
 	{ 1,	TD,	sys_fsync,		"fsync"		}, /* 118 */
-	{ 1,	TS,	sys_sigreturn,		"sigreturn"	}, /* 119 */
+	{ 0,	TS,	sys_sigreturn,		"sigreturn"	}, /* 119 */
 	{ 5,	TP,	sys_clone,		"clone"		}, /* 120 */
 	{ 2,	0,	sys_setdomainname,	"setdomainname"	}, /* 121 */
 	{ 1,	0,	sys_uname,		"uname"		}, /* 122 */
@@ -394,8 +394,8 @@
 	{ 3,	TD,	sys_dup3,		"dup3"		}, /* 363 */
 	{ 2,	TD,	sys_pipe2,		"pipe2"		}, /* 364 */
 	{ 1,	TD,	sys_inotify_init1,	"inotify_init1"	}, /* 365 */
-	{ 5,	TD,	printargs,		"preadv"	}, /* 366 */
-	{ 5,	TD,	printargs,		"pwritev"	}, /* 367 */
+	{ 5,	TD,	sys_preadv,		"preadv"	}, /* 366 */
+	{ 5,	TD,	sys_pwritev,		"pwritev"	}, /* 367 */
 	{ 4,	TP|TS,	printargs,		"rt_tgsigqueueinfo"	}, /* 368 */
 	{ 5,	TD,	printargs,		"perf_event_open"	}, /* 369 */
 	{ 5,	TN,	sys_recvmmsg,		"recvmmsg"	}, /* 370 */
@@ -403,3 +403,7 @@
 	{ 5,	TD|TF,	printargs,		"fanotify_mark"	}, /* 372 */
 	{ 4,	0,	printargs,		"prlimit64"	}, /* 373 */
 	{ 3,	0,	sys_cacheflush,		"cacheflush"	}, /* 374 */
+	{ 5,	TD|TF,	printargs,		"name_to_handle_at"	}, /* 375 */
+	{ 3,	TD,	printargs,		"open_by_handle_at"	}, /* 376 */
+	{ 2,	0,	printargs,		"clock_adjtime"	}, /* 377 */
+	{ 1,	TD,	printargs,		"syncfs"	}, /* 378 */

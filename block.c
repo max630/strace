@@ -54,7 +54,7 @@ struct blk_user_trace_setup {
 #ifndef BLKTRACESTART
 #define BLKTRACESTART _IO(0x12,116)
 #endif
-#ifndef BLKTRACESTART
+#ifndef BLKTRACESTOP
 #define BLKTRACESTOP _IO(0x12,117)
 #endif
 #ifndef BLKTRACETEARDOWN
@@ -194,6 +194,7 @@ block_ioctl(struct tcb *tcp, long code, long arg)
 			}
 		break;
 
+#ifdef HAVE_BLKGETSIZE64
 	/* return an uint64_t */
 	case BLKGETSIZE64:
 		if (exiting(tcp)) {
@@ -204,6 +205,7 @@ block_ioctl(struct tcb *tcp, long code, long arg)
 				tprintf(", %" PRIu64, val);
 		}
 		break;
+#endif
 
 	/* More complex types */
 	case BLKDISCARD:
