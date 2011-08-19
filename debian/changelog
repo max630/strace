@@ -1,4 +1,4 @@
-strace (4.5.20-2.max.1) unstable; urgency=low
+strace (4.5.20-2.3.max.1) unstable; urgency=low
 
   * allow using both -p option and command
     + fix check of options to pass such case
@@ -6,7 +6,28 @@ strace (4.5.20-2.max.1) unstable; urgency=low
     + turn on non-interactive status only if there is no -p argument
     + print pids to outfile when -p and command both specified
 
- -- Max Kirillov <max@max630.net>  Thu, 28 Oct 2010 03:48:11 +0300
+ -- Max Kirillov <max@max630.net>  Fri, 19 Aug 2011 23:49:08 +0300
+
+strace (4.5.20-2.3) unstable; urgency=low
+
+  * Non-maintainer upload.
+  * Add sh4 to arch list.
+  * Add powerpcspe to arch list (Closes: #579842).
+
+ -- Nobuhiro Iwamatsu <iwamatsu@debian.org>  Tue, 22 Mar 2011 09:03:49 +0900
+
+strace (4.5.20-2.2) unstable; urgency=low
+
+  * Non-maintainer upload.
+  * Add sh4 to arch list (Closes: #537105).
+
+ -- Nobuhiro Iwamatsu <iwamatsu@debian.org>  Wed, 09 Mar 2011 09:22:01 +0900
+
+strace (4.5.20-2.1) unstable; urgency=low
+
+  * NMU, added armhf support. (Closes: #596960)
+
+ -- Konstantinos Margaritis <markos@debian.org>  Thu, 24 Feb 2011 14:47:54 +0000
 
 strace (4.5.20-2) unstable; urgency=low
 
